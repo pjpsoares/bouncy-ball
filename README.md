@@ -18,8 +18,20 @@ Assuming you have already cloned this repository to your machine, setup all nece
 
 ## Running the app
 
-If you run 'grunt serve', a local server will be spawned. If some of the development files change, the server will be restarted.
+If you run:
+ 
+    grunt serve
+ 
+a local server will be spawned. If some of the development files change, the server will be restarted.
 
-If you run 'grunt serveDist', a local server will be spawned but it will serve the minified version of the site.
+If you run:
+ 
+    grunt serveDist
+    
+a local server will be spawned but it will serve the minified version of the site.
 
-If you run 'grunt build', you'll first validate the app running eslint and then jasmine (for unit tests) and then will create the dist path, with the minified files.
+If you run:
+ 
+    grunt build
+    
+you'll first validate the app running eslint and then jasmine (for unit tests) and then will create the dist path, with the minified files.
