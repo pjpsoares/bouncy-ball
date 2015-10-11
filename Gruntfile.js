@@ -6,22 +6,19 @@ module.exports = function(grunt) {
     // load all grunt tasks
     require('load-grunt-tasks')(grunt);
 
-    // configurable paths
-    var yeomanConfig = {
-        app: 'app'
-    };
-
     grunt.initConfig({
-        yeoman: yeomanConfig,
+        basePath: {
+            app: 'app'
+        },
         watch: {
             options: {
                 livereload: '<%= connect.options.livereload %>'
             },
             files: [
-                '<%= yeoman.app %>/*.html',
-                '<%= yeoman.app %>/styles/{,*/}*.css',
-                '<%= yeoman.app %>/scripts/{,*/}*.js',
-                '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
+                '<%= basePath.app %>/*.html',
+                '<%= basePath.app %>/styles/{,*/}*.css',
+                '<%= basePath.app %>/scripts/{,*/}*.js',
+                '<%= basePath.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
             ]
         },
         connect: {
@@ -35,16 +32,15 @@ module.exports = function(grunt) {
                 options: {
                     open: true,
                     base: [
-                        '<%= yeoman.app %>'
+                        '<%= basePath.app %>'
                     ]
                 }
             },
-            test: {
+            dist: {
                 options: {
                     open: true,
                     base: [
-                        'tests',
-                        '<%= yeoman.app %>'
+                        'dist'
                     ]
                 }
             }
@@ -83,28 +79,86 @@ module.exports = function(grunt) {
                 singleRun: true
             }
         },
-        uglify: {
-            dist: {
-                files: {src: 'app/scripts/**/*.js', dest: 'dest/bouncy-ball.min.js'}
+        concat: {
+            src: {
+                src: ['app/scripts/**/*.js'],
+                dest: 'dist/bouncy-ball.js'
+            },
+            css: {
+                src: ['app/styles/**/*.css'],
+                dest: 'dist/bouncy-ball.css'
             }
         },
-        clean: ['dist']
+        uglify: {
+            dist: {
+                files: {
+                    'dist/bouncy-ball.min.js': ['<%= concat.src.dest %>']
+                }
+            }
+        },
+        clean: {
+            dist: ['dist'],
+            buildEnd: ['dist/bouncy-ball.js', 'dist/bouncy-ball.css']
+        },
+        cssmin: {
+            minify: {
+                expand: true,
+                src: ['<%= concat.css.dest %>'],
+                ext: '.min.css'
+            }
+        },
+        processhtml: {
+            dist: {
+                options: {
+                    process: true,
+                    data: {
+                        title: 'Bouncy ball',
+                        message: 'This is production distribution'
+                    }
+                },
+                files: {
+                    'dist/index.html': ['app/index.html']
+                }
+            }
+        },
+        htmlmin: {
+            dist: {
+                options: {
+                    removeComments: true,
+                    collapseWhitespace: true
+                },
+                files: {
+                    'dist/index.html': 'dist/index.html'
+                }
+            }
+        },
     });
 
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-htmlmin');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-processhtml');
 
-    grunt.registerTask('server', function(target) {
-        grunt.task.run([
-            'connect:livereload',
-            'watch'
-        ]);
-    });
+    grunt.registerTask('generateDist', [
+        'clean:dist',
+        'concat:src',
+        'concat:css',
+        'uglify',
+        'cssmin',
+        'processhtml',
+        'htmlmin',
+        'clean:buildEnd'
+    ]);
 
-    grunt.registerTask('build', function(target) {
-        grunt.task.run([
-            'eslint',
-            'karma:singleRun'
-        ]);
-    });
+    grunt.registerTask('serve', ['connect:livereload', 'watch']);
+    grunt.registerTask('serveDist', ['generateDist', 'connect:dist', 'watch']);
+
+    grunt.registerTask('build', [
+        'clean:dist',
+        'eslint',
+        'karma:singleRun',
+        'generateDist'
+    ]);
 };
