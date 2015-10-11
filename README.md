@@ -35,3 +35,21 @@ If you run:
     grunt build
     
 you'll first validate the app running eslint and then jasmine (for unit tests) and then will create the dist path, with the minified files.
+
+If you run:
+ 
+    grunt eslint
+    
+you'll run eslint (duh!).
+
+If you run:
+ 
+    grunt karma:singleRun
+    
+you'll run all spec files just once.
+
+If you run:
+ 
+    grunt karma:unit
+    
+you'll run all spec files and will watch for change, if any occurs it will 're-run' the spec files.
